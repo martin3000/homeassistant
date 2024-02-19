@@ -1,28 +1,35 @@
-# python program to analyze shelly4hass
+# python program to analyze shelly4hass usage
+# 2024 by jens martin schlatter, germany
 
 import os
 import json
 import pprint
+try:
+    import yaml
+except ImportError:
+    print("please install python package pyyaml")
+    quit(8)
 
 # Opening JSON file
-base = "/home/nuc/.homeassistant/.storage/"
-f = open(os.path.join(base,'core.config_entries'))
+base = "/home/nuc/.homeassistant"
+
+f = open(os.path.join(base,'.storage','core.config_entries'))
 # returns JSON object as 
 # a dictionary
 config = json.load(f)
 
 # get all shelly devices
-f = open(base+'core.device_registry')
+f = open(os.path.join(base,'.storage','core.device_registry'))
 # returns JSON object as a dictionary
 devices = json.load(f)
 
 # get all shelly entities
-f = open(base+'core.entity_registry')
+f = open(os.path.join(base,'.storage','core.entity_registry'))
 # returns JSON object as a dictionary
 entities = json.load(f)
 
 # get all areas
-f = open(base+'core.area_registry')
+f = open(os.path.join(base,'.storage','core.area_registry'))
 # returns JSON object as a dictionary
 areas = json.load(f)
 areadict = {}
@@ -32,9 +39,15 @@ for a in areas["data"]["areas"]:
     areadict[key] = val
 
 # get GUI usage of entities
-f = open(base+'lovelace')
+f = open(os.path.join(base,'.storage','lovelace'))
 views = json.load(f)["data"]["config"]["views"]
 
+# try to read the automations
+with open(os.path.join(base,'automations.yaml'), 'r') as yfile:
+    automations = yaml.safe_load(yfile)
+
+#pprint.pprint(automations)
+#quit()
 
 # find shelly4hass config entry (I hope this is not the native shelly integration)
 for e in config["data"]["entries"]:
@@ -61,10 +74,12 @@ for d in devices["data"]["devices"]:
                 eid = entity["entity_id"]
                 print("-",eid)
                 for v in views:
+                    # check if the entity is used in badges
                     if "badges" in v:
                       for be in v["badges"]:
                         if eid == be:
                             print("  -> used as badge in view '"+v["title"]+"'")
+                    # check if the entity is used in cards
                     for c in v["cards"]:
                         #print("c==>",c)
                         entities_in_card = c.get("entities")
@@ -77,3 +92,9 @@ for d in devices["data"]["devices"]:
                             else:
                               if eid == xe:
                                 print("  -> used in card in view '"+v["title"]+"'")
+                # check if the entity is used in automations
+                for au in automations:
+                    au_str = json.dumps(au)
+                    if eid in au_str:
+                        #pprint.pprint(au)
+                        print("  -> used in automation",au["id"])
