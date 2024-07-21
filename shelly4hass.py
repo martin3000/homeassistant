@@ -80,7 +80,8 @@ for d in devices["data"]["devices"]:
                         if eid == be:
                             print("  -> used as badge in view '"+v["title"]+"'")
                     # check if the entity is used in cards
-                    for c in v["cards"]:
+                    if "cards" in v: 
+                      for c in v["cards"]:
                         #print("c==>",c)
                         entities_in_card = c.get("entities")
                         if entities_in_card:
