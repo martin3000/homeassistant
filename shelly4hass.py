@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # python program to analyze shelly4hass usage
 # 2024 by jens martin schlatter, germany
 
