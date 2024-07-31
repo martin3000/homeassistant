@@ -60,7 +60,7 @@ for e in config["data"]["entries"]:
 
 # loop over all shelly devices
 for d in devices["data"]["devices"]:
-    if d["config_entries"][0] == entry_id:
+    if d["primary_config_entry"] == entry_id:
         print("--------------------------")
         device_name = d["name"]
         device_id = d["id"]
